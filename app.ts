@@ -10,9 +10,21 @@ const outputCSV = await Deno.open("./output.csv", {
 const sleep = (millis: number) => {
   return new Promise((resolve) => setTimeout(resolve, millis));
 };
-
+const headers = [
+  "#",
+  "Extra",
+  "Language",
+  "",
+  "OracleID",
+  "Quantity",
+  "ScryfallID",
+  "Set Code",
+  "Set Name",
+  "Price",
+];
 // Create rows for each card
-const cards = [];
+const rows = [];
+rows.push(headers)
 for await (const obj of readCSVObjects(inputCSV)) {
   // sleep to be a scyfall good citizen
   sleep(100);
@@ -30,16 +42,16 @@ for await (const obj of readCSVObjects(inputCSV)) {
   // clear out null values as csv writer doesnt handle them
   const cleanedCard = card.map(function (value) {
     if (value == null) {
-      return "na";
+      return "";
     } else {
       return value;
     }
   });
 
   console.log(`\ncard is ${JSON.stringify(cleanedCard)}`);
-  cards.push(cleanedCard);
+  rows.push(cleanedCard);
 }
 
 inputCSV.close();
 
-await writeCSV(outputCSV, cards);
+await writeCSV(outputCSV, rows);
