@@ -1,6 +1,6 @@
 import { readCSVObjects, writeCSV } from "https://deno.land/x/csv/mod.ts";
 
-const inputCSV = await Deno.open("./helvault.csv");
+const inputCSV = await Deno.open("./helvaultmini.csv");
 const outputCSV = await Deno.open("./output.csv", {
   write: true,
   create: true,
@@ -14,7 +14,7 @@ const headers = [
   "#",
   "Extra",
   "Language",
-  "",
+  "Name",
   "OracleID",
   "Quantity",
   "ScryfallID",
@@ -40,7 +40,7 @@ for await (const obj of readCSVObjects(inputCSV)) {
   card[card.length - 1] = price;
 
   // clear out null values as csv writer doesnt handle them
-  const cleanedCard = card.map(function (value) {
+  const cleanedScryfallCard = card.map(function (value) {
     if (value == null) {
       return "";
     } else {
@@ -48,8 +48,8 @@ for await (const obj of readCSVObjects(inputCSV)) {
     }
   });
 
-  console.log(`\ncard is ${JSON.stringify(cleanedCard)}`);
-  rows.push(cleanedCard);
+  console.log(`\ncard is ${JSON.stringify(cleanedScryfallCard)}`);
+  rows.push(cleanedScryfallCard);
 }
 
 inputCSV.close();
