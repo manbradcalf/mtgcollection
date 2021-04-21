@@ -1,34 +1,46 @@
-import { Client } from "https://deno.land/x/mysql/mod.ts";
-import { ScryfallCard } from "./ScryfallCard.ts";
-const client = await new Client().connect({
-  hostname: "127.0.0.1",
-  username: "root",
-  db: "mtgcollection",
-  password: "9001055",
-});
+// import the package from url
+import { MongoClient, Bson } from "https://deno.land/x/mongo@v0.22.0/mod.ts";
+// import { Card } from "./ScryfallCard.ts";
+const mongoUser = "Deno"
+const mongoPass = "Deno"
+const mongoHost = "localhost"
+const mongoPort = "27017"
+const dbName = "mtg-collection"
 
-async function makeTable() {
-  await client.execute(`CREATE DATABASE IF NOT EXISTS mtgcollection`);
-  await client.execute(`USE mtgcollection`);
-  await client.execute(`
-                       CREATE TABLE cards (
-                        collector_number varchar(100) NOT NULL,
-                        extras varchar(100) NOT NULL,
-                        language varchar(100) NOT NULL,
-                        name varchar(100) NOT NULL,
-                        oracle_id varchar(100) NOT NULL,
-                        quantity int NOT NULL,
-                        scryfall_id varchar(100) NOT NULL,
-                        set_code varchar(10) NOT NULL,
-                        set_name varchar(100) NOT NULL,
-                        price decimal NOT NULL
-                       ) ENGINE=CSV CHARSET=utf8`);
+const dbString = `mongodb://${mongoUser}:${mongoPass}@${mongoHost}:${mongoPort}/${dbName}`;
+
+// Create client
+const client = new MongoClient();
+console.log(`client is ${JSON.stringify(client)}\n`)
+console.log(`client connecting....using dbString ${dbString}`)
+await client.connect(dbString);
+console.log(`connected....?`);
+// await client.connect({
+//   db: "mtg-collection",
+//   tls: true,
+//   servers: [
+//     {
+//       host: "mongodb://localhost",
+//       port: 27017,
+//     },
+//   ],
+//   credential: {
+//     username: "Deno",
+//     password: "Deno",
+//     db: "mtg-collection",
+//     mechanism: "SCRAM-SHA-1",
+//   },
+// });
+
+// Defining schema interface
+interface Card {
+  _id: { $oid: string };
+  name: string;
 }
-
-async function insertCard(card: ScryfallCard) {
-  await client.execute(
-    `INSERT INTO cards (collector_number,extras,language,name,oracle_id,quantity,scryfall_id,set_code,set_name,price) VALUES(${card.collectorNumber},${card.extras},${card.language},${card.name},${card.oracle_id},${card.quantity},${card.scryfallUri},${card.setType},${card.setName},${card.prices.usd})`
-  );
-}
-
-export { client, makeTable };
+// Declare the mongodb collections here. Here we are using only one collection (i.e user).
+// Defining schema interface
+// const db = client.database("mtg-collection");
+// const cardCollection = db.collection<Card>("cards");
+// const justOne = await cardCollection.findOne({ _id: "607cf80a05a906bf2d2ec433" });
+// console.log(`data is ${justOne}`)
+// export { db, cardCollection };
