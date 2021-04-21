@@ -29,4 +29,4 @@ console.log(`new card id is ${newCardId}`)
 const justOne = await cardCollection.findOne({ _id: newCardId });
 console.log(`data is ${JSON.stringify(justOne)}`)
 
-export { db, cardCollection };
+export { cardCollection };
