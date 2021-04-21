@@ -1,36 +1,15 @@
 // import the package from url
-import { MongoClient, Bson } from "https://deno.land/x/mongo@v0.22.0/mod.ts";
-// import { Card } from "./ScryfallCard.ts";
-const mongoUser = "Deno"
-const mongoPass = "Deno"
-const mongoHost = "localhost"
-const mongoPort = "27017"
-const dbName = "mtg-collection"
-
-const dbString = `mongodb://${mongoUser}:${mongoPass}@${mongoHost}:${mongoPort}/${dbName}`;
+import { MongoClient } from "https://deno.land/x/mongo@v0.22.0/mod.ts";
 
 // Create client
 const client = new MongoClient();
-console.log(`client is ${JSON.stringify(client)}\n`)
+const dbString = `mongodb://127.0.0.1:27017/mtg-collection?compressors=disabled&gssapiServiceName=mongodb`;
+
 console.log(`client connecting....using dbString ${dbString}`)
+
 await client.connect(dbString);
-console.log(`connected....?`);
-// await client.connect({
-//   db: "mtg-collection",
-//   tls: true,
-//   servers: [
-//     {
-//       host: "mongodb://localhost",
-//       port: 27017,
-//     },
-//   ],
-//   credential: {
-//     username: "Deno",
-//     password: "Deno",
-//     db: "mtg-collection",
-//     mechanism: "SCRAM-SHA-1",
-//   },
-// });
+
+console.log(`connected....\n`);
 
 // Defining schema interface
 interface Card {
@@ -39,8 +18,15 @@ interface Card {
 }
 // Declare the mongodb collections here. Here we are using only one collection (i.e user).
 // Defining schema interface
-// const db = client.database("mtg-collection");
-// const cardCollection = db.collection<Card>("cards");
-// const justOne = await cardCollection.findOne({ _id: "607cf80a05a906bf2d2ec433" });
-// console.log(`data is ${justOne}`)
-// export { db, cardCollection };
+const db = client.database("mtg-collection");
+const cardCollection = db.collection<Card>("cards");
+
+// insert one
+const newCardId = await cardCollection.insertOne({name: "new card 2",price: 100})
+console.log(`new card id is ${newCardId}`)
+
+// find one
+const justOne = await cardCollection.findOne({ _id: newCardId });
+console.log(`data is ${JSON.stringify(justOne)}`)
+
+export { db, cardCollection };
