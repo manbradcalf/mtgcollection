@@ -1,4 +1,4 @@
-import { Router } from "https://deno.land/x/oak/mod.ts";
+import { Router } from "https://deno.land/x/oak@v7.4.0/mod.ts";
 import { getCards, addCard, getCardByScryfallId } from "./controller.ts";
 const router = new Router();
 router

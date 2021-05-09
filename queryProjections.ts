@@ -4,7 +4,12 @@ const basicCardDetails = {
   cmc: 1,
   colors: 1,
   rarity: 1,
+  power: 1,
+  toughness: 1,
   oracle_text: 1,
   set_name: 1,
+  color_identiy: 1,
+  keywords: 1,
+  image_uris:1
 };
 export { basicCardDetails };
