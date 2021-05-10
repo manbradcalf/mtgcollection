@@ -1,5 +1,10 @@
-import { Router } from "https://deno.land/x/oak@v7.4.0/mod.ts";
-import { getCards, addCard, getCardByScryfallId } from "./controller.ts";
+import { Router, helpers } from "https://deno.land/x/oak@v7.4.0/mod.ts";
+import {
+  getCards,
+  addCard,
+  getCardByScryfallId,
+  getCardByName,
+} from "./controller.ts";
 const router = new Router();
 router
   .get("/", (ctx) => {
@@ -8,8 +13,16 @@ router
 
   .get("/get-cards", getCards)
 
-  .get("/get-card/:id", async (ctx) => {
-    const cardData = await getCardByScryfallId(ctx.params.id as string);
+  .get("/get-card", async (ctx) => {
+    const queryParams = helpers.getQuery(ctx, { mergeParams: true });
+    let cardData;
+    console.log(`queryParams are ${JSON.stringify(queryParams)}`);
+    if (queryParams.cardname) {
+      cardData = await getCardByName(queryParams.cardname);
+    }
+    if (queryParams.scryfallId) {
+      cardData = await getCardByScryfallId(ctx.params.id as string);
+    }
     ctx.response.body = cardData;
   })
 

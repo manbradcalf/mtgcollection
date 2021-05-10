@@ -15,8 +15,5 @@ console.log(`connected....\n`);
 // Defining schema interface
 const db = client.database("mtg-collection");
 const cardCollection = db.collection<Card>("cards");
-function findByName(cardName: string) {
-  cardCollection.findOne({ name: cardName });
-}
 
-export { cardCollection, findByName };
+export { cardCollection };

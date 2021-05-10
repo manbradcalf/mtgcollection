@@ -1,20 +1,20 @@
 import { cardCollection } from "./db.ts";
 import { Card } from "./ScryfallCard.ts";
-import { RouterContext } from "https://deno.land/x/oak/mod.ts";
+import { RouterContext } from "https://deno.land/x/oak@v7.4.0/mod.ts";
 import { basicCardDetails } from "./queryProjections.ts";
 const getCards = async (ctx: RouterContext) => {
-  // try {
-  //   const data = await cardCollection.findOne({ dbName: `cards` });
-  //   ctx.response.body = { status: true, data: data };
-  //   ctx.response.status = 200;
-  // } catch (err) {
-  //   ctx.response.body = { status: false, data: null };
-  //   ctx.response.status = 500;
-  //   console.log(err);
-  // }
+  try {
+    const data = await cardCollection.find();
+    ctx.response.body = { status: true, data: data };
+    ctx.response.status = 200;
+  } catch (err) {
+    ctx.response.body = { status: false, data: null };
+    ctx.response.status = 500;
+    console.log(err);
+  }
 };
 
-async function getCardByScryfallId(id:string) {
+async function getCardByScryfallId(id: string) {
   const cardInfo = await cardCollection.findOne(
     { id: id },
     { projection: basicCardDetails }
@@ -37,4 +37,17 @@ const addCard = async (ctx: RouterContext) => {
     console.log(err);
   }
 };
-export { getCards, getCardByScryfallId, addCard };
+
+async function getCardByName(cardName: string) {
+  const cardInfo = await cardCollection
+    .find(
+      {
+        name: { $regex: cardName },
+      },
+      { projection: basicCardDetails }
+    )
+    .toArray();
+  console.log(`card info is ${cardInfo}`);
+  return cardInfo;
+}
+export { getCards, getCardByScryfallId, getCardByName, addCard };
