@@ -1,4 +1,4 @@
-const basicCardDetails = {
+const basicCardDetailsProjection = {
   name: 1,
   type_line: 1,
   cmc: 1,
@@ -12,4 +12,5 @@ const basicCardDetails = {
   keywords: 1,
   image_uris:1
 };
-export { basicCardDetails };
+
+export { basicCardDetailsProjection };
