@@ -39,11 +39,11 @@ async function mapCSVtoCards(csvPath: string): Promise<Card[]> {
 
       // Scryfall gives us strings for prices but we want numbers
       const numPrices = new Prices(
-        parseInt(scryfallCardResponse.prices.usd),
-        parseInt(scryfallCardResponse.prices.usd),
-        parseInt(scryfallCardResponse.prices.usdFoil),
-        parseInt(scryfallCardResponse.prices.eur),
-        parseInt(scryfallCardResponse.prices.tix)
+        parseFloat(scryfallCardResponse.prices.usd),
+        parseFloat(scryfallCardResponse.prices.usd),
+        parseFloat(scryfallCardResponse.prices.usdFoil),
+        parseFloat(scryfallCardResponse.prices.eur),
+        parseFloat(scryfallCardResponse.prices.tix)
       );
 
       mongoCard.historicalPrices.push(
