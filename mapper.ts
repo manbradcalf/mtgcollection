@@ -1,36 +1,72 @@
 import { readCSVObjects } from "https://deno.land/x/csv/mod.ts";
 import { cardCollection } from "./db.ts";
-import { Card } from "./ScryfallCard.ts";
+import { Card, HistoricalPrice, Prices } from "./ScryfallCard.ts";
 
 async function mapCSVtoCards(csvPath: string): Promise<Card[]> {
+  console.log(`calling map function, csvPath is ${csvPath}`);
   const csv = await Deno.open(csvPath);
 
+  console.log(`the csv is ${JSON.stringify(csv)}`);
   const sleep = (millis: number) => {
     return new Promise((resolve) => setTimeout(resolve, millis));
   };
 
   const cards: Card[] = [];
 
-  for await (const obj of readCSVObjects(csv)) {
-    // sleep to be a scyfall good citizen
-    sleep(100);
+  for await (const csvCard of readCSVObjects(csv)) {
+    const cardIsNotInDbYet =
+      (await cardCollection.findOne({ _id: csvCard.scryfall_id })) ===
+      undefined;
 
-    const res = await fetch(
-      `https://api.scryfall.com/cards/${obj.scryfall_id}`
-    );
-    const card = await res.json();
-    card.scryfall_id = obj.scryfall_id
+    if (cardIsNotInDbYet) {
+      // sleep to be a scyfall good citizen
+      sleep(100);
 
-    try {
-    cardCollection.insertOne(card);
-    } catch(e){
-      console.log(`Unable to insert card: ${JSON.stringify(card)}\nerror: ${e || e.message}`)
+      console.log(`csvCard is ${csvCard}`);
+
+      const res = await fetch(
+        `https://api.scryfall.com/cards/${csvCard.scryfall_id}`
+      );
+      const scryfallCardResponse: Card = await res.json();
+
+      console.log(
+        `scryfallResponse is ${JSON.stringify(scryfallCardResponse)}`
+      );
+      // Use scryfallId as our unique object id instead of autogenerating one
+      const mongoCard: Card = scryfallCardResponse as Card;
+      mongoCard._id = csvCard.scryfall_id;
+      mongoCard.historicalPrices = [];
+
+      // Scryfall gives us strings for prices but we want numbers
+      const numPrices = new Prices(
+        parseInt(scryfallCardResponse.prices.usd),
+        parseInt(scryfallCardResponse.prices.usd),
+        parseInt(scryfallCardResponse.prices.usdFoil),
+        parseInt(scryfallCardResponse.prices.eur),
+        parseInt(scryfallCardResponse.prices.tix)
+      );
+
+      mongoCard.historicalPrices.push(
+        new HistoricalPrice(new Date(), numPrices)
+      );
+
+      try {
+        cardCollection.insertOne(mongoCard);
+      } catch (e) {
+        console.log(
+          `Unable to insert scryfallCardResponse: ${JSON.stringify(
+            scryfallCardResponse
+          )}\nerror: ${e || e.message}`
+        );
+      }
+
+      console.log(
+        `\ncard is ${JSON.stringify(
+          scryfallCardResponse.name
+        )} and costs was inserted successfully`
+      );
+      cards.push(scryfallCardResponse);
     }
-
-    console.log(
-      `\ncard is ${JSON.stringify(card.name)} and costs was inserted successfully`
-    );
-    cards.push(card);
   }
 
   csv.close();
