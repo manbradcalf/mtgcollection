@@ -4,8 +4,9 @@ import {
   addCard,
   getCardByScryfallId,
   getCardByName,
-  addTodaysPriceToCard,
+  updatePrice,
 } from "./controller.ts";
+
 const router = new Router();
 router
   .get("/", (ctx) => {
@@ -28,14 +29,7 @@ router
   })
 
   .post("/create-card", addCard)
-  .post("/update-price/:id", async (ctx) => {
-    const result = ctx.request.body({type: "json"})
-    const data = await result.value
-    console.log(`updating price for card ${ctx.params.id}`)
-    await addTodaysPriceToCard(
-      ctx.params.id as string,
-      data
-    );
-  });
+
+  .post("/update-price/:id", updatePrice);
 
 export default router;
