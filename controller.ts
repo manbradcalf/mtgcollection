@@ -1,5 +1,5 @@
 import { cardCollection } from "./db.ts";
-import { Card, Prices } from "./ScryfallCard.ts";
+import { Card, PricesResponse } from "./ScryfallCard.ts";
 import { RouterContext } from "https://deno.land/x/oak@v7.4.0/mod.ts";
 import { basicCardDetailsProjection } from "./queryProjections.ts";
 
@@ -15,13 +15,10 @@ const getCards = async (ctx: RouterContext) => {
   }
 };
 
-async function getCardByScryfallId(id: string) {
-  const cardInfo = await cardCollection.findOne(
-    { id: id },
-    { projection: basicCardDetailsProjection }
-  );
+async function getCardByScryfallId(id: string): Promise<Card> {
+  const cardInfo = await cardCollection.findOne({ id: id });
   console.log(`card is ${JSON.stringify(cardInfo)}`);
-  return cardInfo;
+  return cardInfo as Card;
 }
 
 const addCard = async (ctx: RouterContext) => {
@@ -49,16 +46,24 @@ async function getCardByName(cardName: string) {
   console.log(`card info is ${cardInfo}`);
   return cardInfo;
 }
-// TODO: Methods like this should maybe be in a db layer?
-async function addTodaysPriceToCard(id: string, priceData: Prices) {
-  console.log(`${JSON.stringify(priceData)} is price data`);
-  const response = await cardCollection.updateOne(
-    { _id: id },
-    { $push: { historicalPrices: { date: new Date(), price: priceData } } }
-  );
-  console.log(`db response for id ${id} `);
-  return response;
-}
+
+const addTodaysPriceToCard = async (ctx: RouterContext) => {
+  if (ctx.params.id) {
+    const card: Card = await getCardByScryfallId(ctx.params.id);
+    const price: PricesResponse = card.prices;
+    const response = await cardCollection.updateOne(
+      { _id: ctx.params.id },
+      { $push: { historicalPrices: { date: new Date(), price: price } } }
+    );
+    ctx.response.body = { status: true, data: response };
+    ctx.response.status = 200;
+  } else {
+    ctx.response.body = {
+      status: false,
+      data: { message: `Unable to update card price for ${ctx.params.id}` },
+    };
+  }
+};
 
 export {
   getCards,
