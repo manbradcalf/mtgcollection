@@ -1,11 +1,6 @@
 import { cardCollection } from "./db.ts";
-<<<<<<< HEAD
 import { Card, PricesResponse } from "./ScryfallCard.ts";
-import { RouterContext } from "https://deno.land/x/oak@v7.4.0/mod.ts";
-=======
-import { Card, Prices } from "./ScryfallCard.ts";
 import { RouterContext, helpers } from "https://deno.land/x/oak@v7.4.0/mod.ts";
->>>>>>> 594b6e21cf76f997056f7d97766f71832b809abc
 import { basicCardDetailsProjection } from "./queryProjections.ts";
 
 const getCards = async (ctx: RouterContext) => {
@@ -55,13 +50,6 @@ const addCard = async (ctx: RouterContext) => {
   }
 };
 
-const updatePrice = async (ctx: RouterContext) => {
-  const result = ctx.request.body({ type: "json" });
-  const data = await result.value;
-  console.log(`updating price for card ${ctx.params.id}`);
-  await addTodaysPriceToCard(ctx.params.id as string, data);
-};
-
 async function getCardByName(cardName: string) {
   const cardInfo = await cardCollection.findOne(
     {
@@ -73,7 +61,6 @@ async function getCardByName(cardName: string) {
   return cardInfo;
 }
 
-<<<<<<< HEAD
 const addTodaysPriceToCard = async (ctx: RouterContext) => {
   if (ctx.params.id) {
     const card: Card = await getCardByScryfallId(ctx.params.id);
@@ -91,27 +78,50 @@ const addTodaysPriceToCard = async (ctx: RouterContext) => {
     };
   }
 };
-=======
-// TODO: Methods like this should maybe be in a db layer?
-async function addTodaysPriceToCard(id: string, priceData: Prices) {
-  console.log(`${JSON.stringify(priceData)} is price data`);
-  const response = await cardCollection.updateOne(
-    { _id: id },
-    { $push: { historicalPrices: { date: new Date(), price: priceData } } }
-  );
-  console.log(`db response for id ${id} `);
-  return response;
-}
->>>>>>> 594b6e21cf76f997056f7d97766f71832b809abc
 
 async function getCardsThatCostAtLeast(price: number) {
   const cards = await cardCollection
     .find({
-      historicalPrices: { $elemMatch: { "price.usd": { $gt: price } } }
+      historicalPrices: { $elemMatch: { "price.usd": { $gt: price } } },
     })
     .toArray();
 
   return cards;
 }
 
-export { getCards, getCardByScryfallId, getCardByName, addCard, updatePrice };
+async function updateAllPrices() {
+  const cards = await cardCollection.find().toArray();
+  cards.forEach(async (card) => {
+    console.log(`updating: ${card.name}\nprice is ${card.prices}`);
+    // todo get scryfall price using id
+    const res = await fetch(`https://api.scryfall.com/cards/${card._id}`);
+    const scryfallCardResponse: Card = await res.json();
+
+    const updateResponse = await cardCollection.updateOne(
+      { _id: card._id },
+      {
+        $push: {
+          historicalPrices: {
+            date: new Date(),
+            price: scryfallCardResponse.prices,
+          },
+        },
+      }
+    );
+
+    console.log(
+      `updated: \n${JSON.stringify(updateResponse)}\nprice is now ${
+        scryfallCardResponse.prices
+      }`
+    );
+  });
+}
+
+export {
+  getCards,
+  getCardByScryfallId,
+  getCardByName,
+  addCard,
+  addTodaysPriceToCard,
+  updateAllPrices,
+};

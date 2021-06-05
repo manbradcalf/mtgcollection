@@ -4,7 +4,8 @@ import {
   addCard,
   getCardByScryfallId,
   getCardByName,
-  updatePrice,
+  addTodaysPriceToCard,
+  updateAllPrices,
 } from "./controller.ts";
 
 const router = new Router();
@@ -29,6 +30,9 @@ router
   })
 
   .post("/create-card", addCard)
-  .post("/update-price/:id", updatePrice);
+  .post("/update-price/:id", addTodaysPriceToCard)
+  .post("/update-all-prices", async (ctx) => {
+    await updateAllPrices();
+  });
 
 export default router;
