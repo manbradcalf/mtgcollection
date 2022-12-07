@@ -1,8 +1,9 @@
 import { cardCollection } from "./db.ts";
-import { Card, PricesResponse } from "./ScryfallCard.ts";
-import { RouterContext, helpers } from "https://deno.land/x/oak@v7.4.0/mod.ts";
+import { Card, PricesResponse, Prices } from "./ScryfallCard.ts";
+import { RouterContext, helpers } from "https://deno.land/x/oak/mod.ts";
 import { basicCardDetailsProjection } from "./queryProjections.ts";
-
+import { sleep } from "./mapper.ts";
+console.log('in controller.ts...')
 const getCards = async (ctx: RouterContext) => {
   const queryParams = helpers.getQuery(ctx, { mergeParams: true });
   // TODO: How to properly handle multiple query params
@@ -17,9 +18,21 @@ const getCards = async (ctx: RouterContext) => {
       ctx.response.body = { status: false, data: err.message };
       ctx.response.status = 500;
     }
-  } else {
+  } else if (queryParams.cardname) {
     try {
-      const data = await cardCollection.find().toArray();
+      const data = await getCardsByName(queryParams.cardname);
+      console.log(`returning data: \n ${JSON.stringify(data)}`);
+      ctx.response.body = { status: true, data: data };
+      ctx.response.status = 200;
+    } catch (err) {
+      ctx.response.body = { status: false, data: null };
+      ctx.response.status = 500;
+      console.log(err);
+    }
+  } else if (queryParams.oracletext) {
+    try {
+      const data = await getCardsByOracleText(queryParams.oracletext);
+      console.log(`returning data: \n ${JSON.stringify(data)}`);
       ctx.response.body = { status: true, data: data };
       ctx.response.status = 200;
     } catch (err) {
@@ -50,14 +63,28 @@ const addCard = async (ctx: RouterContext) => {
   }
 };
 
-async function getCardByName(cardName: string) {
-  const cardInfo = await cardCollection.findOne(
-    {
-      name: { $regex: cardName },
-    },
-    { projection: basicCardDetailsProjection }
-  );
-  console.log(`card info is ${cardInfo}`);
+async function getCardsByName(cardName: string) {
+  console.log("in controller, getCardsByName("+cardName+")")
+  const cardInfo = await cardCollection
+    .find(
+      {
+        name: { $regex: cardName, $options: 'i' },
+      },
+      { projection: basicCardDetailsProjection }
+    )
+    .toArray();
+  return cardInfo;
+}
+
+async function getCardsByOracleText(oracleText: string) {
+  const cardInfo = await cardCollection
+    .find(
+      {
+        oracle_text: { $regex: oracleText, $options: 'i' },
+      },
+      { projection: basicCardDetailsProjection }
+    )
+    .toArray();
   return cardInfo;
 }
 
@@ -92,27 +119,35 @@ async function getCardsThatCostAtLeast(price: number) {
 async function updateAllPrices() {
   const cards = await cardCollection.find().toArray();
   cards.forEach(async (card) => {
-    console.log(`updating: ${card.name}\nprice is ${card.prices}`);
     // todo get scryfall price using id
+    sleep(100);
     const res = await fetch(`https://api.scryfall.com/cards/${card._id}`);
     const scryfallCardResponse: Card = await res.json();
+    console.log(`res is ${scryfallCardResponse.prices}`);
 
+    const prices: Prices = new Prices(
+      parseFloat(scryfallCardResponse.prices.usd),
+      parseFloat(scryfallCardResponse.prices.usdFoil),
+      parseFloat(scryfallCardResponse.prices.eur),
+      parseFloat(scryfallCardResponse.prices.eurFoil),
+      parseFloat(scryfallCardResponse.prices.tix)
+    );
     const updateResponse = await cardCollection.updateOne(
       { _id: card._id },
       {
         $push: {
           historicalPrices: {
             date: new Date(),
-            price: scryfallCardResponse.prices,
+            price: prices,
           },
         },
       }
     );
 
     console.log(
-      `updated: \n${JSON.stringify(updateResponse)}\nprice is now ${
-        scryfallCardResponse.prices
-      }`
+      `updated: \n${JSON.stringify(
+        updateResponse
+      )}\nprice is now ${JSON.stringify(scryfallCardResponse.prices)}`
     );
   });
 }
@@ -120,7 +155,8 @@ async function updateAllPrices() {
 export {
   getCards,
   getCardByScryfallId,
-  getCardByName,
+  getCardsByName,
+  getCardsByOracleText,
   addCard,
   addTodaysPriceToCard,
   updateAllPrices,

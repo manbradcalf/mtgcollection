@@ -10,7 +10,8 @@ const basicCardDetailsProjection = {
   set_name: 1,
   color_identiy: 1,
   keywords: 1,
-  image_uris:1
+  image_uris:1,
+  prices: 1
 };
 
 export { basicCardDetailsProjection };

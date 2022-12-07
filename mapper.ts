@@ -2,14 +2,15 @@ import { readCSVObjects } from "https://deno.land/x/csv/mod.ts";
 import { cardCollection } from "./db.ts";
 import { Card, HistoricalPrice, Prices } from "./ScryfallCard.ts";
 
+const sleep = (millis: number) => {
+  return new Promise((resolve) => setTimeout(resolve, millis));
+};
+
 async function mapCSVtoCards(csvPath: string): Promise<Card[]> {
   console.log(`calling map function, csvPath is ${csvPath}`);
   const csv = await Deno.open(csvPath);
 
   console.log(`the csv is ${JSON.stringify(csv)}`);
-  const sleep = (millis: number) => {
-    return new Promise((resolve) => setTimeout(resolve, millis));
-  };
 
   const cards: Card[] = [];
 
@@ -79,4 +80,4 @@ function getTotalPrice(prices: number[]) {
   }, 0);
 }
 
-export { mapCSVtoCards, getTotalPrice };
+export { sleep, mapCSVtoCards, getTotalPrice };

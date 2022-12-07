@@ -15,6 +15,7 @@ db.COLLECTIONNAME.findOne(
   },
   { name: 1, historicalPrices: 1 }
 );
+// example: find in array 
 // return all cards who have been worth more than 15 dollars at some point in
 // their price history
 db.cardstwo.find({historicalPrices:{$elemMatch:{ "price.usd": {"$gt":15}}}},{name:1})
