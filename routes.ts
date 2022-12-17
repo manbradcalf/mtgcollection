@@ -1,4 +1,5 @@
-import { Router, helpers, send } from "https://deno.land/x/oak/mod.ts";
+// import { Router, helpers, send } from "https://deno.land/x/oak/mod.ts";
+import { Router, helpers, send } from "https://deno.land/x/oak@v10.5.1/mod.ts";
 import {
   getCards,
   addCard,
@@ -10,7 +11,6 @@ import {
 } from "./controller.ts";
 
 const router = new Router();
-console.log("initialized Router")
 router
   .get("/", async (ctx) => {
     console.log('called /')
@@ -36,9 +36,13 @@ router
     const queryParams = helpers.getQuery(ctx, { mergeParams: true });
     let cardData;
     if (queryParams.scryfallId) {
-      cardData = await getCardByScryfallId(ctx.params.id as string);
+      cardData = await getCardByScryfallId(queryParams.scryfallId);
     }
-    ctx.response.body = cardData;
+    else if (queryParams.cardname) {
+       cardData = await getCardsByName(queryParams.cardname)
+    }
+    console.log(cardData[0])
+    await ctx.render("detail.handlebars", cardData[0])
   })
 
   .post("/create-card", addCard)
