@@ -77,6 +77,8 @@ async function getCardsByName(cardName: string) {
 }
 
 async function getCardsByOracleText(oracleText: string) {
+  console.log(`finding ${oracleText}`)
+  
   const cardInfo = await cardCollection
     .find(
       {

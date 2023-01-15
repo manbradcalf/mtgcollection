@@ -1,5 +1,6 @@
 // import { Router, helpers, send } from "https://deno.land/x/oak/mod.ts";
-import { Router, helpers, send } from "https://deno.land/x/oak@v10.5.1/mod.ts";
+// import { Router, helpers, send } from "https://deno.land/x/oak@v10.5.1/mod.ts";
+import { Router, helpers, send } from "./deps.ts";
 import {
   getCards,
   addCard,
@@ -41,7 +42,7 @@ router
     else if (queryParams.cardname) {
        cardData = await getCardsByName(queryParams.cardname)
     }
-    console.log(cardData[0])
+    console.log(cardData)
     await ctx.render("detail.handlebars", cardData[0])
   })
 
