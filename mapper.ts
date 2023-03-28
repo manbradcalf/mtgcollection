@@ -1,6 +1,6 @@
 import { readCSVObjects } from "https://deno.land/x/csv/mod.ts";
 import { cardCollection } from "./db.ts";
-import { Card, HistoricalPrice, Prices } from "./ScryfallCard.ts";
+import { Card, HistoricalPrice, Prices } from "./types/ScryfallCard.ts";
 
 const sleep = (millis: number) => {
   return new Promise((resolve) => setTimeout(resolve, millis));

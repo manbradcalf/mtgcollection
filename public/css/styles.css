@@ -1,0 +1,24 @@
+.cardlist-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.cardlist-item {
+  padding: 0.5vw;
+  position: relative;
+}
+
+.cardlist-item-img {
+  width: 20vw;
+  height: max-content;
+}
+
+.price-text {
+  padding-inline: 4px;
+  background-color: greenyellow;
+  position: absolute;
+  bottom: 1%;
+  right: 45%;
+  border-style: solid;
+  border-radius: 5px;
+}

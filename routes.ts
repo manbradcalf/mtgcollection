@@ -14,7 +14,7 @@ import {
 const router = new Router();
 router
   .get("/", async (ctx) => {
-    console.log('called /')
+    console.log("called /");
     await send(ctx, ctx.request.url.pathname, {
       root: `${Deno.cwd()}/view`,
       index: "index.html",
@@ -25,12 +25,13 @@ router
     const queryParams = helpers.getQuery(ctx, { mergeParams: true });
     let cards;
     if (queryParams.oracletext) {
-      cards = await getCardsByOracleText(queryParams.oracletext)
+      cards = await getCardsByOracleText(queryParams.oracletext);
     }
     if (queryParams.cardname) {
-      cards = await getCardsByName(queryParams.cardname)
+      cards = await getCardsByName(queryParams.cardname);
     }
-    ctx.response.body = cards
+    console.log(cards?.slice(0,2));
+    await ctx.render("list.handlebars", cards);
   })
 
   .get("/get-card", async (ctx) => {
@@ -38,12 +39,11 @@ router
     let cardData;
     if (queryParams.scryfallId) {
       cardData = await getCardByScryfallId(queryParams.scryfallId);
+    } else if (queryParams.cardname) {
+      cardData = await getCardsByName(queryParams.cardname);
     }
-    else if (queryParams.cardname) {
-       cardData = await getCardsByName(queryParams.cardname)
-    }
-    console.log(cardData)
-    await ctx.render("detail.handlebars", cardData[0])
+    console.log(cardData);
+    await ctx.render("detail.handlebars", cardData);
   })
 
   .post("/create-card", addCard)

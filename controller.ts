@@ -1,5 +1,5 @@
 import { cardCollection } from "./db.ts";
-import { Card, PricesResponse, Prices } from "./ScryfallCard.ts";
+import { Card, PricesResponse, Prices } from "./types/ScryfallCard.ts";
 import { RouterContext, helpers } from "https://deno.land/x/oak/mod.ts";
 import { basicCardDetailsProjection } from "./queryProjections.ts";
 import { sleep } from "./mapper.ts";
@@ -45,7 +45,6 @@ const getCards = async (ctx: RouterContext) => {
 
 async function getCardByScryfallId(id: string): Promise<Card> {
   const cardInfo = await cardCollection.findOne({ id: id });
-  console.log(`card is ${JSON.stringify(cardInfo)}`);
   return cardInfo as Card;
 }
 

@@ -1,3 +1,0 @@
-<body>
-  Hobbies of <%=it.name%> 
-</body>

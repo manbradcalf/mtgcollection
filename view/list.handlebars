@@ -1,0 +1,9 @@
+<link rel="stylesheet" href="css/styles.css" />
+<div class="cardlist-wrapper">
+  {{#each this}}
+  <div class="cardlist-item">
+    <img class="cardlist-item-img" src={{image_uris.normal}} />
+    <p class="price-text">${{prices.usd}}</p>
+  </div>
+  {{/each}}
+</div>

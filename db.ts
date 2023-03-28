@@ -1,6 +1,6 @@
 // import the package from url
 import { MongoClient } from "https://deno.land/x/mongo@v0.22.0/mod.ts";
-import { Card } from "./ScryfallCard.ts";
+import { Card } from "./types/ScryfallCard.ts";
 
 // Create client
 const client = new MongoClient();
