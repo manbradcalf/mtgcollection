@@ -3,7 +3,7 @@ import { Card, PricesResponse, Prices } from "./types/ScryfallCard.ts";
 import { RouterContext, helpers } from "https://deno.land/x/oak/mod.ts";
 import { basicCardDetailsProjection } from "./queryProjections.ts";
 import { sleep } from "./mapper.ts";
-console.log('in controller.ts...')
+console.log("in controller.ts...");
 const getCards = async (ctx: RouterContext) => {
   const queryParams = helpers.getQuery(ctx, { mergeParams: true });
   // TODO: How to properly handle multiple query params
@@ -63,11 +63,11 @@ const addCard = async (ctx: RouterContext) => {
 };
 
 async function getCardsByName(cardName: string) {
-  console.log("in controller, getCardsByName("+cardName+")")
+  console.log("in controller, getCardsByName(" + cardName + ")");
   const cardInfo = await cardCollection
     .find(
       {
-        name: { $regex: cardName, $options: 'i' },
+        name: { $regex: cardName, $options: "i" },
       },
       { projection: basicCardDetailsProjection }
     )
@@ -76,12 +76,12 @@ async function getCardsByName(cardName: string) {
 }
 
 async function getCardsByOracleText(oracleText: string) {
-  console.log(`finding ${oracleText}`)
-  
+  console.log(`finding ${oracleText}`);
+
   const cardInfo = await cardCollection
     .find(
       {
-        oracle_text: { $regex: oracleText, $options: 'i' },
+        oracle_text: { $regex: oracleText, $options: "i" },
       },
       { projection: basicCardDetailsProjection }
     )
@@ -107,7 +107,7 @@ const addTodaysPriceToCard = async (ctx: RouterContext) => {
   }
 };
 
-async function getCardsThatCostAtLeast(price: number) {
+export async function getCardsThatCostAtLeast(price: number) {
   const cards = await cardCollection
     .find({
       historicalPrices: { $elemMatch: { "price.usd": { $gt: price } } },
@@ -118,40 +118,50 @@ async function getCardsThatCostAtLeast(price: number) {
 }
 
 async function updateAllPrices() {
-  const cards = await cardCollection.find().toArray();
-  cards.forEach(async (card) => {
+  const cards: Card[] = await cardCollection.find().toArray();
+  for(const i in cards) {
+
     // todo get scryfall price using id
-    sleep(100);
-    const res = await fetch(`https://api.scryfall.com/cards/${card._id}`);
+    await sleep(101);
+    const res = await fetch(`https://api.scryfall.com/cards/${cards[i]._id}`);
     const scryfallCardResponse: Card = await res.json();
-    console.log(`res is ${scryfallCardResponse.prices}`);
+    if (scryfallCardResponse.prices) {
+      console.log(
+        `prices for ${scryfallCardResponse.name}:\n ${JSON.stringify(
+          scryfallCardResponse.prices
+        )}\n`
+      );
 
-    const prices: Prices = new Prices(
-      parseFloat(scryfallCardResponse.prices.usd),
-      parseFloat(scryfallCardResponse.prices.usdFoil),
-      parseFloat(scryfallCardResponse.prices.eur),
-      parseFloat(scryfallCardResponse.prices.eurFoil),
-      parseFloat(scryfallCardResponse.prices.tix)
-    );
-    const updateResponse = await cardCollection.updateOne(
-      { _id: card._id },
-      {
-        $push: {
-          historicalPrices: {
-            date: new Date(),
-            price: prices,
+      const prices: Prices = new Prices(
+        parseFloat(scryfallCardResponse.prices?.usd),
+        parseFloat(scryfallCardResponse.prices?.usdFoil),
+        parseFloat(scryfallCardResponse.prices?.eur),
+        parseFloat(scryfallCardResponse.prices?.eurFoil),
+        parseFloat(scryfallCardResponse.prices?.tix)
+      );
+      const updateResponse = await cardCollection.updateOne(
+        { _id: cards[i]._id },
+        {
+          $push: {
+            historicalPrices: {
+              date: new Date(),
+              price: prices,
+            },
           },
-        },
-      }
-    );
+        }
+      );
 
-    console.log(
-      `updated: \n${JSON.stringify(
-        updateResponse
-      )}\nprice is now ${JSON.stringify(scryfallCardResponse.prices)}`
-    );
-  });
+      console.log(
+        `updated: \n${JSON.stringify(
+          updateResponse
+        )}\n${scryfallCardResponse.name} is now ${JSON.stringify(scryfallCardResponse.prices)}`
+      );
+    } else {
+      console.log("NO PRICES FOR " + scryfallCardResponse.name);
+    }
+  }
 }
+  
 
 export {
   getCards,

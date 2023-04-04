@@ -21,7 +21,7 @@ async function mapCSVtoCards(csvPath: string): Promise<Card[]> {
 
     if (cardIsNotInDbYet) {
       // sleep to be a scyfall good citizen
-      sleep(100);
+      await sleep(100);
 
       console.log(`csvCard is ${csvCard}`);
 

@@ -1,15 +1,14 @@
-// import { Router, helpers, send } from "https://deno.land/x/oak/mod.ts";
-// import { Router, helpers, send } from "https://deno.land/x/oak@v10.5.1/mod.ts";
 import { Router, helpers, send } from "./deps.ts";
 import {
-  getCards,
   addCard,
+  getCardsThatCostAtLeast,
   getCardByScryfallId,
   getCardsByName,
   addTodaysPriceToCard,
   updateAllPrices,
   getCardsByOracleText,
 } from "./controller.ts";
+import { sleep } from "./mapper.ts";
 
 const router = new Router();
 router
@@ -23,14 +22,16 @@ router
 
   .get("/get-cards", async (ctx) => {
     const queryParams = helpers.getQuery(ctx, { mergeParams: true });
-    let cards;
+    let cards: ScryfallCard;
     if (queryParams.oracletext) {
       cards = await getCardsByOracleText(queryParams.oracletext);
     }
     if (queryParams.cardname) {
       cards = await getCardsByName(queryParams.cardname);
     }
-    console.log(cards?.slice(0,2));
+    if (queryParams.price) {
+      cards = await getCardsThatCostAtLeast(Number(queryParams.price));
+    }
     await ctx.render("list.handlebars", cards);
   })
 
@@ -46,10 +47,17 @@ router
     await ctx.render("detail.handlebars", cardData);
   })
 
+  .post("/sleep", async (ctx) => {
+    const requestBody: { ms: number } = await ctx.request.body().value;
+    await sleep(requestBody.ms);
+    ctx.response.body = "You slept " + requestBody.ms;
+  })
   .post("/create-card", addCard)
   .post("/update-price/:id", addTodaysPriceToCard)
-  .post("/update-all-prices", async (ctx) => {
-    await updateAllPrices();
+  .post("/update-all-prices", (ctx) => {
+    updateAllPrices();
+    ctx.response.body = "Submitted";
+    ctx.response.status = 201;
   });
 
 export default router;
