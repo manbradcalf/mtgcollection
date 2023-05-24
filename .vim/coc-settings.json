@@ -4,7 +4,9 @@
   "deno.unstable": true,
   "prettier.disableLanguages": [
     "typescript",
-    "javascript"
+    "javascript",
+    "handlebars",
+    "html"
   ],
   "tsserver.enable": false
 }
