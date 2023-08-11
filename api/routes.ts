@@ -2,12 +2,10 @@ import { Router, helpers, send } from "../deps.ts";
 import {
   addCard,
   getCards,
-  getCardsThatCostAtLeast,
   getCardByScryfallId,
   getCardsByName,
   addTodaysPriceToCard,
   updateAllPrices,
-  getCardsByOracleText,
 } from "./controller.ts";
 import { sleep } from "../util/mapper.ts";
 

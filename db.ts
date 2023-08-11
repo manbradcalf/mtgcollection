@@ -1,9 +1,9 @@
 // import the package from url
-import { MongoClient } from "https://deno.land/x/mongo@v0.22.0/mod.ts";
+import * as mongo from "https://deno.land/x/mongo@v0.31.2/mod.ts";
 import { Card } from "./types/ScryfallCard.ts";
 
 // Create client
-const client = new MongoClient();
+const client = new mongo.MongoClient();
 const dbString = `mongodb://127.0.0.1:27017/mtg-collection?compressors=disabled&gssapiServiceName=mongodb`;
 console.log(`client connecting....using dbString ${dbString}`);
 
