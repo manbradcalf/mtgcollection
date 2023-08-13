@@ -1,24 +1,39 @@
 .cardlist-wrapper {
   display: flex;
+  /* max-width: 25vw; */
+  flex-direction: row;
+  gap: 0.5vw;
   flex-wrap: wrap;
 }
 
 .cardlist-item {
   padding: 0.5vw;
-  position: relative;
+  border: black;
+  border-width: thin;
+  border-style: solid;
+  max-width: 25vw;
+  border-radius: 10px;
 }
 
 .cardlist-item-img {
-  width: 20vw;
-  height: max-content;
+  width: 25vw;
+  height: min-content;
+  margin: auto;
+  display: block;
+}
+
+.cardlist-item-name {
+  text-align: center;
 }
 
 .price-text {
-  padding-inline: 4px;
-  background-color: greenyellow;
-  position: absolute;
+  background-color: green;
+  max-width: 5vw;
   bottom: 1%;
-  right: 45%;
   border-style: solid;
   border-radius: 5px;
+  color: white;
+  margin: auto;
+  border: 1px solid black;
+  text-align: center;
 }
