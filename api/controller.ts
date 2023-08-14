@@ -12,6 +12,9 @@ const getCards = async (ctx: RouterContext) => {
   if (queryParams.minPrice) {
     mongoQuery["prices.usd"] = { $gt: parseFloat(queryParams.minPrice) };
   }
+  if (queryParams.type_line) {
+    mongoQuery.type_line = { $regex: queryParams.type_line, $options: "i" };
+  }
   if (queryParams.cardname) {
     mongoQuery.name = {
       $regex: queryParams.cardname,
