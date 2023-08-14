@@ -1,22 +1,19 @@
 .cardlist-wrapper {
   display: flex;
-  /* max-width: 25vw; */
   flex-direction: row;
-  gap: 0.5vw;
   flex-wrap: wrap;
 }
 
 .cardlist-item {
   padding: 0.5vw;
-  border: black;
-  border-width: thin;
-  border-style: solid;
-  max-width: 25vw;
-  border-radius: 10px;
 }
 
+.cardlist-item-oracle {
+  font-size: small;
+  max-width: 120px;
+}
 .cardlist-item-img {
-  width: 25vw;
+  width: 30vw;
   height: min-content;
   margin: auto;
   display: block;
@@ -28,7 +25,6 @@
 
 .price-text {
   background-color: green;
-  max-width: 5vw;
   bottom: 1%;
   border-style: solid;
   border-radius: 5px;
@@ -36,4 +32,5 @@
   margin: auto;
   border: 1px solid black;
   text-align: center;
+  font-size: small;
 }
