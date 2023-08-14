@@ -20,17 +20,13 @@ router
   })
 
   .get("/get-cards", async (ctx) => {
-    let cards = await getCards(ctx)
-    // if (queryParams.oracletext) {
-    //   cards = await getCardsByOracleText(queryParams.oracletext);
-    // }
-    // if (queryParams.cardname) {
-    //   cards = await getCardsByName(queryParams.cardname);
-    // }
-    // if (queryParams.price) {
-    //   cards = await getCardsThatCostAtLeast(Number(queryParams.price));
-    // }
-    await ctx.render("list.handlebars", cards);
+    const cards = await getCards(ctx);
+    await ctx.render(
+      "list.handlebars",
+      cards.sort((a, b) => {
+        return Number(b.prices.usd) - Number(a.prices.usd);
+      })
+    );
   })
 
   .get("/get-card", async (ctx) => {
