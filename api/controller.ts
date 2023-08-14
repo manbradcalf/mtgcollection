@@ -7,12 +7,10 @@ console.log("in controller.ts...");
 
 const getCards = async (ctx: RouterContext) => {
   const queryParams = helpers.getQuery(ctx);
-  console.log(queryParams)
+  console.log(queryParams);
   const mongoQuery: any = {};
   if (queryParams.minPrice) {
-    mongoQuery.historicalPrices = {
-      $elemMatch: { "price.usd": { $gt: parseFloat(queryParams.minPrice) } },
-    };
+    mongoQuery["prices.usd"] = { $gt: parseFloat(queryParams.minPrice) };
   }
   if (queryParams.cardname) {
     mongoQuery.name = {
@@ -27,7 +25,9 @@ const getCards = async (ctx: RouterContext) => {
     };
   }
   try {
-    let cards = await cardCollection.find(mongoQuery, {projection: basicCardDetailsProjection}).toArray()
+    let cards = await cardCollection
+      .find(mongoQuery, { projection: basicCardDetailsProjection })
+      .toArray();
     return cards;
   } catch (err) {
     console.log(err);
@@ -103,6 +103,7 @@ const addTodaysPriceToCard = async (ctx: RouterContext) => {
 };
 
 const addCard = async (ctx: RouterContext) => {
+  // todo: implement flip cards
   try {
     const card: Card = await ctx.request.body().value;
     console.log(card);
@@ -141,7 +142,7 @@ async function updateAllPrices() {
         { _id: cards[i]._id },
         {
           $set: {
-            prices: prices
+            prices: prices,
           },
           $push: {
             historicalPrices: {
