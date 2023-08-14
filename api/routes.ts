@@ -19,8 +19,25 @@ router
     });
   })
 
+  // https://cards.scryfall.io/small/front/${id.charAt(0)}/${id.charAt(1)}/${id}.jpg
   .get("/get-cards", async (ctx) => {
     const cards = await getCards(ctx);
+    cards?.map((x) => {
+      // todo: implement flip cards 
+      // mdfc arent saving image_uris because image_uris are under
+      // cardface objects.
+      // however theres a pattern to constructing image_uris in scryfall so we
+      // use that (for now) idk why it works
+      console.log(x);
+      if (x.image_uris === undefined) {
+        x.image_uris = {
+          normal: `https://cards.scryfall.io/normal/front/${x._id.charAt(
+            0
+          )}/${x._id.charAt(1)}/${x._id}.jpg`,
+        };
+      }
+    });
+    console.log(cards);
     await ctx.render(
       "list.handlebars",
       cards.sort((a, b) => {
