@@ -7,6 +7,7 @@ console.log("in controller.ts...");
 
 const getCards = async (ctx: RouterContext) => {
   const queryParams = helpers.getQuery(ctx);
+  console.log(queryParams)
   const mongoQuery: any = {};
   if (queryParams.minPrice) {
     mongoQuery.historicalPrices = {
@@ -139,6 +140,9 @@ async function updateAllPrices() {
       const updateResponse = await cardCollection.updateOne(
         { _id: cards[i]._id },
         {
+          $set: {
+            prices: prices
+          },
           $push: {
             historicalPrices: {
               date: new Date(),
