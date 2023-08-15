@@ -39,7 +39,7 @@ async function mapCSVtoCards(csvPath: string): Promise<Card[]> {
       mongoCard.historicalPrices = [];
 
       // Scryfall gives us strings for prices but we want numbers
-      const numPrices = new Prices(
+      const prices = new Prices(
         parseFloat(scryfallCardResponse.prices.usd),
         parseFloat(scryfallCardResponse.prices.usd),
         parseFloat(scryfallCardResponse.prices.usdFoil),
@@ -47,19 +47,9 @@ async function mapCSVtoCards(csvPath: string): Promise<Card[]> {
         parseFloat(scryfallCardResponse.prices.tix)
       );
 
-      mongoCard.historicalPrices.push(
-        new HistoricalPrice(new Date(), numPrices)
-      );
+      mongoCard.historicalPrices.push(new HistoricalPrice(new Date(), prices));
 
-      try {
-        cardCollection.insertOne(mongoCard);
-      } catch (e) {
-        console.log(
-          `Unable to insert scryfallCardResponse: ${JSON.stringify(
-            scryfallCardResponse
-          )}\nerror: ${e || e.message}`
-        );
-      }
+      cardCollection.insertOne(mongoCard);
 
       console.log(
         `\ncard is ${JSON.stringify(
