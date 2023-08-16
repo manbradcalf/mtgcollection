@@ -14,6 +14,6 @@ console.log(`connected....\n`);
 // Declare the mongodb collections here. Here we are using only one collection (i.e user).
 // Defining schema interface
 const db = client.database("mtg-collection");
-const cardCollection = db.collection<Card>("cardstwo");
+const cardCollection = db.collection<Card>("binderOne");
 
 export { cardCollection };
