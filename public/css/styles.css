@@ -1,3 +1,7 @@
+.color-identity-section {
+  display: inline;
+}
+
 .cardlist-wrapper {
   display: flex;
   flex-direction: row;

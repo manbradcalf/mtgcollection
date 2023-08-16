@@ -2,14 +2,35 @@
 <h2>Search for a card</h2>
 
 <form action="/get-cards">
-  <input type="text" id="card-search" name="cardname" placeholder="card name" />
+  <input type="text" id="card-search" name="cardName" placeholder="card name" />
   <br>
-  <input type="text" id="card-search-oracletext" name="oracletext" placeholder="oracle text" />
+  <input type="text" id="card-search-oracletext" name="oracleText" placeholder="oracle text" />
   <br>
   <input type="text" id="card-search-price" name="minPrice" placeholder="minimum price" />
   <br>
-  <input type="text" id="card-search-type" name="type_line" placeholder="type" />
+  <input type="text" id="card-search-type" name="typeLine" placeholder="type" />
   <br>
+  <input type="text" id="card-search-minCmc" name="minCmc" placeholder="minCmc" />
+  <br>
+  <div class="color-identity-section">
+    <input type="checkbox" id="w" name="w" placeholder="W" />
+    <label for="w">W</label>
+    <input type="checkbox" id="u" name="u" placeholder="U" />
+    <label for="u">U</label>
+    <input type="checkbox" id="b" name="b" placeholder="B" />
+    <label for="b">B</label>
+    <input type="checkbox" id="r" name="r" placeholder="R" />
+    <label for="r">R</label>
+    <input type="checkbox" id="g" name="g" placeholder="G" />
+    <label for="g">G</label>
+  </div>
+
+  <!-- TODO: MORE SEARCH OPTIONS -->
+  <!-- <input type="text" id="card-search-type" name="type_line" placeholder="type" /> -->
+  <!-- <br> -->
+  <!-- <input type="text" id="card-search-type" name="type_line" placeholder="type" /> -->
+  <!-- <br> -->
+
   <input type="submit" />
 </form>
 </form>

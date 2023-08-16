@@ -1,5 +1,5 @@
 import { cardCollection } from "../db.ts";
-import { Card, PricesResponse, Prices } from "../types/ScryfallCard.ts";
+import { ScryfallCard, PricesResponse, Prices } from "../types/ScryfallCard.ts";
 import { RouterContext, helpers } from "https://deno.land/x/oak/mod.ts";
 import { basicCardDetailsProjection } from "../util/queryProjections.ts";
 import { sleep } from "../util/mapper.ts";
@@ -12,23 +12,52 @@ const getCards = async (ctx: RouterContext) => {
   if (queryParams.minPrice) {
     mongoQuery["prices.usd"] = { $gt: parseFloat(queryParams.minPrice) };
   }
-  if (queryParams.type_line) {
-    mongoQuery.type_line = { $regex: queryParams.type_line, $options: "i" };
+  if (queryParams.typeLine) {
+    mongoQuery.type_line = { $regex: queryParams.typeLine, $options: "i" };
   }
-  if (queryParams.cardname) {
+  if (queryParams.cardName) {
     mongoQuery.name = {
-      $regex: queryParams.cardname,
+      $regex: queryParams.cardName,
       $options: "i",
     };
   }
-  if (queryParams.oracletext) {
+  if (queryParams.oracleText) {
     mongoQuery.oracle_text = {
-      $regex: queryParams.oracletext,
+      $regex: queryParams.oracleText,
       $options: "i",
     };
   }
+
+  const colorIdentity = [];
+  if (queryParams.w === "on") {
+    colorIdentity.push("W");
+  }
+  if (queryParams.u === "on") {
+    colorIdentity.push("U");
+  }
+  if (queryParams.b === "on") {
+    colorIdentity.push("B");
+  }
+  if (queryParams.r === "on") {
+    colorIdentity.push("R");
+  }
+  if (queryParams.g === "on") {
+    colorIdentity.push("G");
+  }
+  if (colorIdentity.length !== 0) {
+    console.log(colorIdentity);
+    mongoQuery.color_identity = {
+      $all: colorIdentity,
+    };
+  }
+  if (queryParams.minCmc) {
+    mongoQuery.cmc = {
+      $gte: parseInt(queryParams.minCmc),
+    };
+  }
+
   try {
-    let cards = await cardCollection
+    const cards = await cardCollection
       .find(mongoQuery, { projection: basicCardDetailsProjection })
       .toArray();
     return cards;
@@ -45,9 +74,9 @@ async function findCards(mongoQuery: any) {
     .toArray();
 }
 
-async function getCardByScryfallId(id: string): Promise<Card> {
+async function getCardByScryfallId(id: string): Promise<ScryfallCard> {
   const cardInfo = await cardCollection.findOne({ id: id });
-  return cardInfo as Card;
+  return cardInfo as ScryfallCard;
 }
 
 async function getCardsByName(cardName: string) {
@@ -89,7 +118,7 @@ async function getCardsThatCostAtLeast(price: number) {
 
 const addTodaysPriceToCard = async (ctx: RouterContext) => {
   if (ctx.params.id) {
-    const card: Card = await getCardByScryfallId(ctx.params.id);
+    const card: ScryfallCard = await getCardByScryfallId(ctx.params.id);
     const price: PricesResponse = card.prices;
     const response = await cardCollection.updateOne(
       { _id: ctx.params.id },
@@ -108,7 +137,7 @@ const addTodaysPriceToCard = async (ctx: RouterContext) => {
 const addCard = async (ctx: RouterContext) => {
   // todo: implement flip cards
   try {
-    const card: Card = await ctx.request.body().value;
+    const card: ScryfallCard = await ctx.request.body().value;
     console.log(card);
     const id = await cardCollection.insertOne(card);
     ctx.response.body = { status: true, data: id };
@@ -121,12 +150,12 @@ const addCard = async (ctx: RouterContext) => {
 };
 
 async function updateAllPrices() {
-  const cards: Card[] = await cardCollection.find().toArray();
+  const cards: ScryfallCard[] = await cardCollection.find().toArray();
   for (const i in cards) {
     // todo get scryfall price using id
     await sleep(100);
     const res = await fetch(`https://api.scryfall.com/cards/${cards[i]._id}`);
-    const scryfallCardResponse: Card = await res.json();
+    const scryfallCardResponse: ScryfallCard = await res.json();
     if (scryfallCardResponse.prices) {
       console.log(
         `prices for ${scryfallCardResponse.name}:\n ${JSON.stringify(
@@ -134,13 +163,14 @@ async function updateAllPrices() {
         )}\n`
       );
 
-      const prices: Prices = new Prices(
-        parseFloat(scryfallCardResponse.prices?.usd),
-        parseFloat(scryfallCardResponse.prices?.usdFoil),
-        parseFloat(scryfallCardResponse.prices?.eur),
-        parseFloat(scryfallCardResponse.prices?.eurFoil),
-        parseFloat(scryfallCardResponse.prices?.tix)
-      );
+      const prices: Prices = {
+        usd: parseFloat(scryfallCardResponse.prices?.usd),
+        usdFoil: parseFloat(scryfallCardResponse.prices?.usdFoil),
+        eur: parseFloat(scryfallCardResponse.prices?.eur),
+        eurFoil: parseFloat(scryfallCardResponse.prices?.eurFoil),
+        tix: parseFloat(scryfallCardResponse.prices?.tix),
+      };
+
       const updateResponse = await cardCollection.updateOne(
         { _id: cards[i]._id },
         {
