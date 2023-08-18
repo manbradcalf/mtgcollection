@@ -55,6 +55,11 @@ const getCards = async (ctx: RouterContext) => {
       $gte: parseInt(queryParams.minCmc),
     };
   }
+  if (queryParams.maxCmc) {
+    mongoQuery.cmc = {
+      $lte: parseInt(queryParams.maxCmc),
+    };
+  }
 
   try {
     const cards = await cardCollection
